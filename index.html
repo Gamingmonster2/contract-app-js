@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract & CSV Local Analyzer | Secure Client-Side Analytics</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Plus Jakarta Sans for ultra-modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Kufi+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        arabic: ['Noto Kufi Arabic', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f4fe',
+                            100: '#e1e9fc',
+                            200: '#c8d7fa',
+                            300: '#a1bbf6',
+                            400: '#7297f0',
+                            500: '#3b82f6', // Pearl Blue Accent
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e3a8a', // Deep Corporate Blue
+                            900: '#1e293b',
+                            950: '#0f172a',
+                        }
+                    },
+                    animation: {
+                        'float-slow': 'float 8s ease-in-out infinite',
+                        'float-delayed': 'float 12s ease-in-out infinite 2s',
+                        'pulse-subtle': 'pulseSubtle 4s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-15px) rotate(2deg)' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '0.4' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for premium feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Pearl iridescent glassmorphism effect */
+        .pearl-glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+        }
+        /* Dark console styles */
+        .console-font {
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+    <!-- Pearlescent Background Blobs -->
+    <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-purple-200/30 via-blue-100/20 to-emerald-100/20 rounded-full blur-[100px] -z-10 pointer-events-none animate-float-slow"></div>
+    <div class="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-200/20 via-indigo-100/30 to-pink-100/20 rounded-full blur-[120px] -z-10 pointer-events-none animate-float-delayed"></div>
+    <div class="absolute bottom-10 left-10 w-[400px] h-[400px] bg-gradient-to-tr from-cyan-100/30 to-purple-100/30 rounded-full blur-[90px] -z-10 pointer-events-none"></div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-800 to-brand-500 flex items-center justify-center shadow-md shadow-brand-500/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-sm font-semibold tracking-wider text-brand-950 uppercase">Contract.org.ly</span>
+                    <span class="block text-[10px] text-slate-500 font-medium -mt-1">Local Analyzer Subsystem</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-medium">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>معالجة محلية آمنة بنسبة 100%</span>
+                </div>
+                <a href="#main-content" class="text-xs font-semibold text-brand-800 hover:text-brand-600 transition-colors">
+                    App Console
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Structural Layout -->
+    <main id="main-content" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <!-- Hero Section -->
+        <section class="text-center max-w-3xl mx-auto mb-16">
+            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium mb-6">
+                <svg class="w-3.5 h-3.5 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M2.166 4.9c.522-.521 1.36-.521 1.882 0L10 10.958l5.952-6.058a1.33 1.33 0 111.88 1.882l-6.9 7.018a1.33 1.33 0 01-1.88 0l-6.9-7.018a1.33 1.33 0 010-1.882z" clip-rule="evenodd"/>
+                </svg>
+                <span>مستنداتك آمنة ولا يتم رفعها إلى أي خادم</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-brand-950 tracking-tight leading-tight mb-4">
+                تحليل عقود وجداول البيانات محلياً <br>
+                <span class="bg-gradient-to-r from-brand-800 via-brand-600 to-indigo-600 bg-clip-text text-transparent">بخصوصية تامة وسرعة فائقة</span>
+            </h1>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
+                اسحب وأسقط ملفات العقود وجداول البيانات <code class="bg-slate-100 text-brand-700 px-1.5 py-0.5 rounded text-sm font-mono">.csv</code> للحصول على إحصائيات فورية ورسوم بيانية تفاعلية مع تقرير فني مخصص.
+            </p>
+        </section>
+
+        <!-- Drag & Drop Uploader Component -->
+        <section class="max-w-4xl mx-auto mb-16">
+            <div id="dropzone" class="relative group cursor-pointer border-2 border-dashed border-slate-300 hover:border-brand-500 bg-white/60 hover:bg-white/90 transition-all duration-300 rounded-2xl p-10 text-center shadow-sm hover:shadow-md">
+                <input type="file" id="fileInput" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" aria-label="Upload CSV File">
+                
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Iridescent Icon Container -->
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-50 to-brand-100 flex items-center justify-center border border-brand-200/50 group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </div>
+                    
+                    <div>
+                        <p class="text-base font-semibold text-brand-950">اسحب ملف الـ CSV هنا أو اضغط للتصفح</p>
+                        <p class="text-xs text-slate-400 mt-1">يدعم الملفات الكبيرة والترميز الموحد UTF-8</p>
+                    </div>
+                    
+                    <div class="inline-flex items-center space-x-2 text-xs text-brand-600 bg-brand-50 px-3 py-1 rounded-full font-medium">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M2.166 4.9a1.33 1.33 0 011.88 0L10 10.958l5.952-6.058a1.33 1.33 0 111.88 1.882l-6.9 7.018a1.33 1.33 0 01-1.88 0l-6.9-7.018a1.33 1.33 0 010-1.882z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>أمان مطلق: يتم تشغيل كل شيء على متصفحك فقط</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error Alert -->
+            <div id="errorAlert" class="hidden mt-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center space-x-2">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <span id="errorMessage">حدث خطأ أثناء معالجة الملف. يرجى التأكد من صحة صيغة CSV.</span>
+            </div>
+        </section>
+
+        <!-- Dashboard Dashboard View (Initially Hidden/Empty State) -->
+        <div id="dashboardView" class="hidden space-y-12 transition-all duration-500">
+            
+            <!-- Summary Stats (The Three Rectangles Layout) -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Box 1: Total Rows -->
+                <div class="pearl-glass rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-bl-full -z-10"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Records</span>
+                        <div class="p-2 bg-brand-50 text-brand-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-extrabold text-brand-950 tracking-tight" id="statRows">0</h3>
+                    <p class="text-xs text-slate-500 mt-2">إجمالي صفوف البيانات المكتشفة</p>
+                </div>
+
+                <!-- Box 2: Total Columns -->
+                <div class="pearl-glass rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-bl-full -z-10"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Columns</span>
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-extrabold text-brand-950 tracking-tight" id="statCols">0</h3>
+                    <p class="text-xs text-slate-500 mt-2">مجموع الأعمدة المحددة بالجدول</p>
+                </div>
+
+                <!-- Box 3: Data Integrity Score -->
+                <div class="pearl-glass rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full -z-10"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Data Integrity</span>
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-extrabold text-brand-950 tracking-tight" id="statIntegrity">0%</h3>
+                    <p class="text-xs text-slate-500 mt-2">نسبة الخلايا غير الفارغة والمكتملة</p>
+                </div>
+            </section>
+
+            <!-- Charting & Controls Section -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                <!-- Chart Controls Panel -->
+                <div class="pearl-glass rounded-2xl p-6 lg:col-span-1 space-y-6">
+                    <h4 class="text-lg font-bold text-brand-950 border-b border-slate-200/60 pb-3">إعدادات المخطط البياني</h4>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="xAxisSelector" class="block text-xs font-semibold text-slate-500 uppercase mb-2">محور السينات (X-Axis / Labels)</label>
+                            <select id="xAxisSelector" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="yAxisSelector" class="block text-xs font-semibold text-slate-500 uppercase mb-2">محور الصادات (Y-Axis / Values)</label>
+                            <select id="yAxisSelector" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"></select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">نوع المخطط</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="btnLineChart" class="px-4 py-2 text-xs font-medium rounded-lg bg-brand-800 text-white transition-all">مخطط خطي</button>
+                                <button id="btnBarChart" class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all">مخطط شريطي</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Chart Canvas Container -->
+                <div class="pearl-glass rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between min-h-[380px]">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-bold text-brand-950">التحليل البياني التفاعلي</h4>
+                        <span class="text-xs bg-brand-50 text-brand-600 px-2.5 py-1 rounded-full font-semibold">تحديث تلقائي</span>
+                    </div>
+                    <div class="relative flex-grow">
+                        <canvas id="analyticsChart" class="w-full max-h-[300px]"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Minimalist Arabic Console Report (RTL) -->
+            <section class="w-full">
+                <div class="bg-slate-900 text-slate-200 rounded-2xl overflow-hidden shadow-xl border border-slate-800" dir="rtl">
+                    <!-- Console Header -->
+                    <div class="bg-slate-950 px-4 py-3 flex items-center justify-between border-b border-slate-800">
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                        </div>
+                        <span class="text-xs font-mono text-slate-400 font-semibold tracking-wider">لوحة التحكم والتحليل الفني للمستند</span>
+                    </div>
+                    <!-- Console Body -->
+                    <div class="p-6 console-font text-sm leading-relaxed space-y-4 font-arabic">
+                        <div class="flex items-center space-x-2 space-x-reverse text-emerald-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="font-semibold">حالة النظام: جاهز ومحمي بالكامل (معالجة محلية 100%)</span>
+                        </div>
+                        <div class="border-t border-slate-800/80 my-3"></div>
+                        <div id="consoleOutput" class="space-y-2 text-slate-300">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Preview Grid Component -->
+            <section class="pearl-glass rounded-2xl p-6 overflow-hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-lg font-bold text-brand-950">معاينة البيانات المستوردة (أول 10 صفوف)</h4>
+                    <span class="text-xs text-slate-500">معاينة سريعة</span>
+                </div>
+                <div class="overflow-x-auto border border-slate-200/60 rounded-xl">
+                    <table class="w-full text-left border-collapse text-sm" id="previewTable">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold">
+                                <!-- Dynamic headers -->
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-600">
+                            <!-- Dynamic rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Empty State View -->
+        <div id="emptyState" class="text-center py-12 max-w-md mx-auto">
+            <div class="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+            </div>
+            <p class="text-slate-500 text-sm">قم برفع ملف CSV صالح لبدء استخراج البيانات والتحليل التلقائي فوراً.</p>
+        </div>
+
+    </main>
+
+    <!-- Deep Corporate Footer -->
+    <footer class="bg-brand-950 text-slate-400 border-t border-slate-900 mt-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-2 space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center border border-brand-500/20">
+                            <span class="text-white font-bold text-sm">C</span>
+                        </div>
+                        <span class="text-white font-bold tracking-wider text-sm uppercase">Contract.org.ly</span>
+                    </div>
+                    <p class="text-xs text-slate-400 max-w-sm leading-relaxed">
+                        منصة وطنية متكاملة لمعالجة وتحليل بيانات العقود والمستندات محلياً مع ضمان السرية المطلقة للمعلومات الحساسة.
+                    </p>
+                </div>
+                <div>
+                    <h5 class="text-white font-semibold text-xs uppercase tracking-wider mb-3">الخصوصية والأمان</h5>
+                    <ul class="space-y-2 text-xs">
+                        <li><span class="hover:text-white transition-colors">معالجة محلية 100%</span></li>
+                        <li><span class="hover:text-white transition-colors">تشفير البيانات التام</span></li>
+                        <li><span class="hover:text-white transition-colors">لا توجد سجلات خارجية</span></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-white font-semibold text-xs uppercase tracking-wider mb-3">اتصال</h5>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="mailto:support@contract.org.ly" class="hover:text-white transition-colors" aria-label="Email Support">support@contract.org.ly</a></li>
+                        <li><span class="text-slate-500">طرابلس، ليبيا</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-900 mt-8 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs">
+                <p>&copy; 2024 Contract.org.ly. جميع الحقوق محفوظة.</p>
+                <div class="flex space-x-4 mt-4 sm:mt-0">
+                    <span class="text-slate-500">الإصدار 1.0.0 (نسخة الويب المحلية)</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global State
+        let parsedData = [];
+        let headers = [];
+        let numericColumns = [];
+        let currentChart = null;
+        let chartType = 'line';
+
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        const dashboardView = document.getElementById('dashboardView');
+        const emptyState = document.getElementById('emptyState');
+        
+        const statRows = document.getElementById('statRows');
+        const statCols = document.getElementById('statCols');
+        const statIntegrity = document.getElementById('statIntegrity');
+
+        const xAxisSelector = document.getElementById('xAxisSelector');
+        const yAxisSelector = document.getElementById('yAxisSelector');
+        const btnLineChart = document.getElementById('btnLineChart');
+        const btnBarChart = document.getElementById('btnBarChart');
+        const consoleOutput = document.getElementById('consoleOutput');
+        const previewTable = document.getElementById('previewTable');
+
+        // Drag & Drop Event Listeners
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('border-brand-500', 'bg-white/90');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-brand-500', 'bg-white/90');
+            }, false);
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // File Handler
+        function handleFile(file) {
+            if (!file.name.endsWith('.csv')) {
+                showError("تنسيق ملف غير صالح. يرجى تحميل ملف بصيغة CSV فقط.");
+                return;
+            }
+            hideError();
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                processCSV(text, file.name);
+            };
+            reader.onerror = function() {
+                showError("فشل قراءة الملف. يرجى المحاولة مرة أخرى.");
+            };
+            reader.readAsText(file);
+        }
+
+        // CSV Parser Engine (Vanilla JS, handles commas inside quotes)
+        function parseCSV(text) {
+            const result = [];
+            let row = [''];
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i+1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        row[row.length - 1] += '"';
+                        i++; // skip next quote
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push('');
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') { i++; }
+                    result.push(row);
+                    row = [''];
+                } else {
+                    row[row.length - 1] += char;
+                }
+            }
+            if (row.length > 1 || row[0] !== '') {
+                result.push(row);
+            }
+            // Filter out empty rows
+            return result.filter(r => r.some(cell => cell.trim() !== ''));
+        }
+
+        // Data Processing & Analysis
+        function processCSV(csvText, fileName) {
+            try {
+                const rows = parseCSV(csvText);
+                if (rows.length < 2) {
+                    showError("الملف المرفوع فارغ أو لا يحتوي على صفوف كافية للتحليل.");
+                    return;
+                }
+
+                headers = rows[0].map(h => h.trim());
+                parsedData = rows.slice(1);
+
+                // Detect Numeric Columns
+                numericColumns = [];
+                headers.forEach((header, colIndex) => {
+                    let isNumeric = true;
+                    let numCount = 0;
+                    for (let i = 0; i < Math.min(parsedData.length, 20); i++) {
+                        const val = parsedData[i][colIndex];
+                        if (val !== undefined && val.trim() !== '') {
+                            const cleanVal = val.replace(/[\$,%]/g, '').trim();
+                            if (!isNaN(Number(cleanVal))) {
+                                numCount++;
+                            } else {
+                                isNumeric = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (isNumeric && numCount > 0) {
+                        numericColumns.push({ index: colIndex, name: header });
+                    }
+                });
+
+                // Calculate Integrity Score
+                let totalCells = parsedData.length * headers.length;
+                let filledCells = 0;
+                parsedData.forEach(row => {
+                    row.forEach(cell => {
+                        if (cell !== undefined && cell.trim() !== '') {
+                            filledCells++;
+                        }
+                    });
+                });
+                const integrityPercent = Math.round((filledCells / totalCells) * 100);
+
+                // UI Updates
+                statRows.textContent = parsedData.length.toLocaleString();
+                statCols.textContent = headers.length.toLocaleString();
+                statIntegrity.textContent = `${integrityPercent}%`;
+
+                // Setup Selectors
+                populateSelectors();
+
+                // Generate Chart
+                updateChart();
+
+                // Arabic Console Report
+                generateConsoleReport(fileName, integrityPercent);
+
+                // Preview Table
+                renderPreviewTable();
+
+                // Show Dashboard
+                emptyState.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                showError("حدث خطأ تقني أثناء محاولة قراءة وتفسير ملف الـ CSV.");
+            }
+        }
+
+        // Populate Chart Axes Selectors
+        function populateSelectors() {
+            xAxisSelector.innerHTML = '';
+            yAxisSelector.innerHTML = '';
+
+            headers.forEach((header, index) => {
+                const optionX = document.createElement('option');
+                optionX.value = index;
+                optionX.textContent = header;
+                xAxisSelector.appendChild(optionX);
+            });
+
+            if (numericColumns.length > 0) {
+                numericColumns.forEach(col => {
+                    const optionY = document.createElement('option');
+                    optionY.value = col.index;
+                    optionY.textContent = col.name;
+                    yAxisSelector.appendChild(optionY);
+                });
+            } else {
+                // Fallback to any column if no numeric columns found
+                headers.forEach((header, index) => {
+                    const optionY = document.createElement('option');
+                    optionY.value = index;
+                    optionY.textContent = header;
+                    yAxisSelector.appendChild(optionY);
+                });
+            }
+
+            // Default selection logic
+            if (xAxisSelector.options.length > 0) xAxisSelector.selectedIndex = 0;
+            if (yAxisSelector.options.length > 0) yAxisSelector.selectedIndex = 0;
+        }
+
+        // Dynamic Chart Render
+        function updateChart() {
+            if (parsedData.length === 0) return;
+
+            const xIndex = parseInt(xAxisSelector.value);
+            const yIndex = parseInt(yAxisSelector.value);
+
+            if (isNaN(xIndex) || isNaN(yIndex)) return;
+
+            // Take first 50 rows for performance and readability
+            const limit = Math.min(parsedData.length, 50);
+            const labels = [];
+            const values = [];
+
+            for (let i = 0; i < limit; i++) {
+                labels.push(parsedData[i][xIndex] || `السجل ${i + 1}`);
+                const rawVal = parsedData[i][yIndex] || '0';
+                const cleanVal = parseFloat(rawVal.replace(/[\$,%]/g, '').trim());
+                values.push(isNaN(cleanVal) ? 0 : cleanVal);
+            }
+
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            
+            // Create Gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(37, 99, 235, 0.4)');
+            gradient.addColorStop(1, 'rgba(37, 99, 235, 0.01)');
+
+            currentChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: headers[yIndex],
+                        data: values,
+                        borderColor: '#2563eb',
+                        borderWidth: 2.5,
+                        backgroundColor: chartType === 'line' ? gradient : '#3b82f6',
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#1e3a8a',
+                        pointBorderColor: '#ffffff',
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(226, 232, 240, 0.6)'
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 10
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Minimalist Arabic Console Insights Generation
+        function generateConsoleReport(fileName, integrity) {
+            const timestamp = new Date().toLocaleString('ar-LY', { hour12: true });
+            let integrityReport = '';
+            if (integrity > 90) {
+                integrityReport = "ممتازة جداً ولا تحتاج إلى تنظيف إضافي للبيانات.";
+            } else if (integrity > 70) {
+                integrityReport = "مقبولة، ولكن يُنصح بمراجعة الخلايا الفارغة لضمان الدقة.";
+            } else {
+                integrityReport = "منخفضة! ننصح بشدة بتدقيق السجلات وملء الفراغات لتجنب انحراف التحليلات.";
+            }
+
+            let numericSummary = numericColumns.map(col => col.name).join('، ');
+            if (numericSummary === '') {
+                numericSummary = 'لا توجد أعمدة رقمية واضحة متبقية للتحليل التلقائي السريع.';
+            }
+
+            consoleOutput.innerHTML = `
+                <div class="space-y-2">
+                    <p class="text-slate-400">&gt; تم تحميل الملف بنجاح: <span class="text-white font-semibold">${fileName}</span></p>
+                    <p class="text-slate-400">&gt; وقت العملية: <span class="text-white">${timestamp}</span></p>
+                    <p class="text-slate-400">&gt; إجمالي الأعمدة المكتشفة: <span class="text-indigo-400">${headers.length} أعمدة</span></p>
+                    <p class="text-slate-400">&gt; الأعمدة الرقمية المحددة للتحليل المالي أو الكمي: <span class="text-brand-400">${numericSummary}</span></p>
+                    <p class="text-slate-400">&gt; حالة سلامة البيانات: <span class="text-emerald-400 font-bold">${integrity}%</span> - هذه القيمة تعتبر ${integrityReport}</p>
+                    <div class="border-t border-slate-800 my-2"></div>
+                    <p class="text-xs text-slate-500">&gt; تم تشغيل خوارزمية التحليل الإحصائي المحلي بنجاح. جميع الحسابات تمت محلياً على جهازك دون إرسال أي بايت عبر الإنترنت.</p>
+                </div>
+            `;
+        }
+
+        // Render Top 10 rows in Preview Table
+        function renderPreviewTable() {
+            // Header
+            const thead = previewTable.querySelector('thead tr');
+            thead.innerHTML = '';
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.className = 'px-6 py-3 text-left font-semibold text-xs tracking-wider uppercase text-slate-700';
+                th.textContent = header;
+                thead.appendChild(th);
+            });
+
+            // Rows
+            const tbody = previewTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            const previewLimit = Math.min(parsedData.length, 10);
+            for (let i = 0; i < previewLimit; i++) {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition-colors';
+                parsedData[i].forEach(cellValue => {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-3 whitespace-nowrap text-slate-600 border-b border-slate-100';
+                    td.textContent = cellValue !== undefined ? cellValue : '';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            }
+        }
+
+        // Error Handling
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.classList.remove('hidden');
+            dashboardView.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorAlert.classList.add('hidden');
+        }
+
+        // Chart Type Switcher Listeners
+        btnLineChart.addEventListener('click', () => {
+            chartType = 'line';
+            btnLineChart.className = "px-4 py-2 text-xs font-medium rounded-lg bg-brand-800 text-white transition-all";
+            btnBarChart.className = "px-4 py-2 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all";
+            updateChart();
+        });
+
+        btnBarChart.addEventListener('click', () => {
+            chartType = 'bar';
+            btnBarChart.className = "px-4 py-2 text-xs font-medium rounded-lg bg-brand-800 text-white transition-all";
+            btnLineChart.className = "px-4 py-2 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all";
+            updateChart();
+        });
+
+        xAxisSelector.addEventListener('change', updateChart);
+        yAxisSelector.addEventListener('change', updateChart);
+
+    </script>
+</body>
+</html>
